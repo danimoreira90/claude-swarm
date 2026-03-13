@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_description": "Post-tool hooks: quality gate + auto-format after file writes/edits",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$CLAUDE_TOOL_RESULT_FILE_PATH\"; if [ -z \"$FILE\" ]; then exit 0; fi; if echo \"$FILE\" | grep -qE \"\\.(ts|tsx)$\"; then if command -v biome &>/dev/null; then biome check --write \"$FILE\" 2>/dev/null; elif command -v prettier &>/dev/null; then prettier --write \"$FILE\" 2>/dev/null; fi; fi; if echo \"$FILE\" | grep -qE \"\\.py$\"; then if command -v ruff &>/dev/null; then ruff format \"$FILE\" 2>/dev/null; fi; fi'",
+            "async": true,
+            "timeout": 15,
+            "description": "Auto-format TypeScript/Python files after write/edit (Biome, Prettier, or Ruff)"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$CLAUDE_TOOL_RESULT_FILE_PATH\"; if [ -z \"$FILE\" ]; then exit 0; fi; if echo \"$FILE\" | grep -qE \"\\.(ts|tsx)$\" && [ -f tsconfig.json ]; then npx tsc --noEmit 2>&1 | head -20; fi'",
+            "async": true,
+            "timeout": 30,
+            "description": "TypeScript type-check after editing .ts/.tsx files"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'FILE=\"$CLAUDE_TOOL_RESULT_FILE_PATH\"; if [ -z \"$FILE\" ]; then exit 0; fi; if echo \"$FILE\" | grep -qE \"\\.(ts|tsx|js|jsx)$\"; then if grep -q \"console\\.log\" \"$FILE\" 2>/dev/null; then echo \"[post-tool] Warning: console.log found in $FILE\"; fi; fi'",
+            "async": true,
+            "timeout": 5,
+            "description": "Warn about console.log statements in committed files"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'OUTPUT=\"$CLAUDE_TOOL_RESULT\"; if echo \"$OUTPUT\" | grep -qE \"(https://github.com/[^/]+/[^/]+/pull/[0-9]+)\"; then PR_URL=$(echo \"$OUTPUT\" | grep -oE \"https://github.com/[^/]+/[^/]+/pull/[0-9]+\" | head -1); echo \"[post-tool] PR created: $PR_URL — review with: gh pr view --web $PR_URL\"; fi'",
+            "async": true,
+            "timeout": 5,
+            "description": "Log PR URL after gh pr create commands"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_description": "Session persistence: captures context at session end, restores at session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'MEMORY_DIR=\"$HOME/.claude/memory\"; mkdir -p \"$MEMORY_DIR\"; if [ -f \"$MEMORY_DIR/last-session.md\" ]; then echo \"[session] Previous session context found:\"; head -30 \"$MEMORY_DIR/last-session.md\"; echo \"---\"; fi; if [ -f \".claude/loop-state.md\" ]; then echo \"[session] Active loop state found:\"; cat .claude/loop-state.md; fi'",
+            "description": "Load previous session context and active loop state on session start"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'MEMORY_DIR=\"$HOME/.claude/memory\"; mkdir -p \"$MEMORY_DIR\"; TIMESTAMP=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\"); cat > \"$MEMORY_DIR/last-session.md\" << EOF\n# Last Session\n**Saved**: $TIMESTAMP\n**Working Directory**: $(pwd)\n**Git Branch**: $(git branch --show-current 2>/dev/null || echo \"not a git repo\")\n**Recent Files Modified**: $(git diff --name-only HEAD 2>/dev/null | head -10 || echo \"none\")\n**Status**: Session ended normally\nEOF\necho \"[session] Context saved to $MEMORY_DIR/last-session.md\"'",
+            "async": true,
+            "timeout": 10,
+            "description": "Persist session metadata on stop"
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'MEMORY_DIR=\"$HOME/.claude/memory\"; mkdir -p \"$MEMORY_DIR\"; COST_FILE=\"$MEMORY_DIR/session-costs.jsonl\"; if [ -n \"$CLAUDE_SESSION_ID\" ]; then echo \"{\\\"session\\\": \\\"$CLAUDE_SESSION_ID\\\", \\\"timestamp\\\": \\\"$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")\\\", \\\"dir\\\": \\\"$(pwd)\\\"}\" >> \"$COST_FILE\"; fi'",
+            "async": true,
+            "timeout": 5,
+            "description": "Track session usage for cost analysis"
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'MEMORY_DIR=\"$HOME/.claude/memory\"; mkdir -p \"$MEMORY_DIR\"; echo \"[pre-compact] Saving state before context compaction...\"; if [ -f \".claude/loop-state.md\" ]; then cp .claude/loop-state.md \"$MEMORY_DIR/loop-state-backup.md\"; echo \"[pre-compact] Loop state backed up.\"; fi'",
+            "description": "Backup loop state before context is compacted"
+          }
+        ]
+      }
+    ]
+  }
+}

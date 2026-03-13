@@ -1,0 +1,194 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_readme": "Elite Claude Swarm — MCP Server Configuration. Copy needed servers to ~/.claude.json mcpServers section. Replace all YOUR_*_HERE placeholders with real values.",
+
+  "mcpServers": {
+
+    "_tier_a_core": "═══════════════ TIER A: CORE (Setup Immediately) ═══════════════",
+
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "YOUR_GITHUB_PAT_HERE"
+      },
+      "description": "GitHub operations — PRs, issues, repos, code search, file contents",
+      "tier": "A",
+      "setup": "Create PAT at https://github.com/settings/tokens with: repo, read:org, read:user"
+    },
+
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "description": "Persistent knowledge graph — cross-session memory for agents",
+      "tier": "A",
+      "setup": "No config needed. Stores a knowledge graph that persists across Claude sessions."
+    },
+
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "description": "Multi-step chain-of-thought reasoning — enables complex problem decomposition",
+      "tier": "A",
+      "setup": "No config needed."
+    },
+
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@context7/mcp-server"],
+      "description": "Live documentation lookup — fetches up-to-date library docs. Replaces hallucinated docs.",
+      "tier": "A",
+      "setup": "No API key needed. Uses free tier. Optional: set CONTEXT7_API_KEY for higher limits.",
+      "usage": "When implementing with any library, use context7 to get current API docs before coding."
+    },
+
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/user/projects"],
+      "description": "Extended filesystem operations beyond standard Claude file tools",
+      "tier": "A",
+      "setup": "Change the path argument to your projects directory. Add multiple paths as needed."
+    },
+
+    "exa-web-search": {
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server"],
+      "env": {
+        "EXA_API_KEY": "YOUR_EXA_API_KEY_HERE"
+      },
+      "description": "Web search + research for research-first development workflow. Better than Google for technical content.",
+      "tier": "A",
+      "setup": "Get API key at https://dashboard.exa.ai. Free tier: 1000 searches/month."
+    },
+
+    "_tier_b_stack": "═══════════════ TIER B: YOUR STACK (Per-project setup) ═══════════════",
+
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase@latest", "--project-ref=YOUR_PROJECT_REF"],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "YOUR_SUPABASE_ACCESS_TOKEN"
+      },
+      "description": "Supabase DB + auth operations — query tables, manage schema, RLS policies",
+      "tier": "B",
+      "setup": "Get project ref from Supabase dashboard URL. Access token from Account → Access Tokens."
+    },
+
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "postgresql://user:password@localhost:5432/dbname"
+      },
+      "description": "Direct PostgreSQL operations — run queries, inspect schema, optimize",
+      "tier": "B",
+      "setup": "Set connection string. Use read-only user for safety in production."
+    },
+
+    "redis": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-redis", "redis://localhost:6379"],
+      "description": "Redis cache inspection and management",
+      "tier": "B",
+      "setup": "Update URL to your Redis instance. Supports auth: redis://:password@host:port"
+    },
+
+    "docker": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-docker"],
+      "description": "Docker container management — list, inspect, start/stop containers",
+      "tier": "B",
+      "setup": "Requires Docker Desktop running. No additional config needed."
+    },
+
+    "_tier_c_ai": "═══════════════ TIER C: AI/RESEARCH ═══════════════",
+
+    "langfuse": {
+      "command": "npx",
+      "args": ["-y", "@langfuse/mcp-server"],
+      "env": {
+        "LANGFUSE_SECRET_KEY": "YOUR_LANGFUSE_SECRET_KEY",
+        "LANGFUSE_PUBLIC_KEY": "YOUR_LANGFUSE_PUBLIC_KEY",
+        "LANGFUSE_HOST": "https://cloud.langfuse.com"
+      },
+      "description": "LLM observability — traces, evals, prompt management, token costs",
+      "tier": "C",
+      "setup": "Get keys at https://cloud.langfuse.com. Self-host option available."
+    },
+
+    "qdrant": {
+      "command": "npx",
+      "args": ["-y", "@qdrant/mcp-server-qdrant"],
+      "env": {
+        "QDRANT_URL": "http://localhost:6333",
+        "QDRANT_API_KEY": "YOUR_QDRANT_API_KEY_HERE"
+      },
+      "description": "Qdrant vector DB — manage collections, inspect vectors, run similarity searches",
+      "tier": "C",
+      "setup": "Point to your Qdrant instance. API key optional for local instances."
+    },
+
+    "_tier_d_cloud": "═══════════════ TIER D: CLOUD PLATFORMS ═══════════════",
+
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com",
+      "description": "Vercel deployments + project management — deploy, inspect, manage env vars",
+      "tier": "D",
+      "setup": "Authenticate via: claude mcp add vercel https://mcp.vercel.com"
+    },
+
+    "cloudflare-workers-builds": {
+      "type": "http",
+      "url": "https://builds.mcp.cloudflare.com/mcp",
+      "description": "Cloudflare Workers builds and deployments",
+      "tier": "D",
+      "setup": "Authenticate via Cloudflare dashboard OAuth"
+    },
+
+    "cloudflare-workers-bindings": {
+      "type": "http",
+      "url": "https://bindings.mcp.cloudflare.com/mcp",
+      "description": "Cloudflare Workers bindings — KV, R2, D1, Durable Objects",
+      "tier": "D"
+    },
+
+    "cloudflare-observability": {
+      "type": "http",
+      "url": "https://observability.mcp.cloudflare.com/mcp",
+      "description": "Cloudflare observability — logs, analytics, error tracking",
+      "tier": "D"
+    },
+
+    "railway": {
+      "command": "npx",
+      "args": ["-y", "@railway/mcp-server"],
+      "env": {
+        "RAILWAY_TOKEN": "YOUR_RAILWAY_TOKEN_HERE"
+      },
+      "description": "Railway deployments — services, env vars, volumes, networking",
+      "tier": "D",
+      "setup": "Get token at https://railway.app/account/tokens"
+    }
+  },
+
+  "_installation": {
+    "add_single_server": "claude mcp add <name> <command> [args]",
+    "add_http_server": "claude mcp add --transport http <name> <url>",
+    "list_servers": "claude mcp list",
+    "test_server": "claude mcp test <name>",
+    "remove_server": "claude mcp remove <name>",
+    "copy_to_global": "Copy mcpServers section to ~/.claude.json for global availability"
+  },
+
+  "_quick_setup_tier_a": {
+    "description": "Commands to add all Tier A servers at once",
+    "commands": [
+      "claude mcp add memory npx -- -y @modelcontextprotocol/server-memory",
+      "claude mcp add sequential-thinking npx -- -y @modelcontextprotocol/server-sequential-thinking",
+      "claude mcp add context7 npx -- -y @context7/mcp-server",
+      "claude mcp add github -e GITHUB_PERSONAL_ACCESS_TOKEN=YOUR_PAT npx -- -y @modelcontextprotocol/server-github",
+      "claude mcp add exa-web-search -e EXA_API_KEY=YOUR_KEY npx -- -y exa-mcp-server"
+    ]
+  }
+}
